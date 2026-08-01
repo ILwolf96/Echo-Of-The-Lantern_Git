@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using EchoOfTheLantern.Runtime;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -57,7 +58,7 @@ namespace EchoOfTheLantern.EditorTools
             new($"{EnvironmentRoot}/PFB_Rubble_Large.prefab", "SPR_Rubble_Large.png", new Vector2(1.0f, 0.8f), false, false, -2),
             new($"{EnvironmentRoot}/PFB_Statue.prefab", "SPR_Statue.png", new Vector2(0.9f, 1.1f), false, false, -2),
 
-            new($"{PlayerRoot}/PFB_Player.prefab", "SPR_Player_Idle.png", new Vector2(0.55f, 0.85f), false, true, 0),
+            new($"{PlayerRoot}/PFB_Player.prefab", "SPR_Player_Idle.png", new Vector2(0.45f, 0.65f), false, true, 0),
 
             new($"{InteractablesRoot}/PFB_Beacon.prefab", "SPR_Beacon_Off.png", new Vector2(0.85f, 0.85f), true, false, 3),
             new($"{InteractablesRoot}/PFB_Shrine.prefab", "SPR_Shrine.png", new Vector2(1.2f, 1.2f), true, false, 3),
@@ -175,6 +176,16 @@ namespace EchoOfTheLantern.EditorTools
             BoxCollider2D collider = temp.AddComponent<BoxCollider2D>();
             collider.size = spec.ColliderSize;
             collider.isTrigger = spec.IsTrigger;
+
+            if (spec.PrefabPath.EndsWith("PFB_Player.prefab", StringComparison.OrdinalIgnoreCase))
+            {
+                temp.AddComponent<PlayerController>();
+                temp.transform.localScale = Vector3.one * 0.85f;
+            }
+            else if (spec.PrefabPath.EndsWith("PFB_Beacon.prefab", StringComparison.OrdinalIgnoreCase))
+            {
+                temp.transform.localScale = Vector3.one * 1.15f;
+            }
 
             string folder = Path.GetDirectoryName(spec.PrefabPath)?.Replace("\\", "/") ?? string.Empty;
             if (!AssetDatabase.IsValidFolder(folder))

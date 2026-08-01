@@ -1,4 +1,6 @@
 #if UNITY_EDITOR
+using EchoOfTheLantern.Runtime;
+using EchoOfTheLantern.Runtime.Services;
 using System;
 using System.IO;
 using UnityEditor;
@@ -99,6 +101,7 @@ namespace EchoOfTheLantern.EditorTools
             EnsureCamera(scene, false);
             EnsureEventSystem(scene);
             EnsureCanvas(scene, "Canvas_Game");
+            EnsureGameSystems(scene);
 
             GameObject sceneRoot = new GameObject("SceneRoot");
             SceneManager.MoveGameObjectToScene(sceneRoot, scene);
@@ -139,6 +142,20 @@ namespace EchoOfTheLantern.EditorTools
             CreateMarker(markersRoot.transform, "Spawn_Shrine", new Vector3(0f, -3.25f, 0f));
 
             EditorSceneManager.SaveScene(scene, GameScenePath);
+        }
+
+        private static void EnsureGameSystems(Scene scene)
+        {
+            GameObject systemsRoot = GameObject.Find("GameSystems");
+            if (systemsRoot != null)
+                return;
+
+            systemsRoot = new GameObject("GameSystems");
+            SceneManager.MoveGameObjectToScene(systemsRoot, scene);
+
+            systemsRoot.AddComponent<GameStateManager>();
+            systemsRoot.AddComponent<ObjectiveManager>();
+            systemsRoot.AddComponent<AssetRegistry>();
         }
 
         private static void BuildGroundGrid(Scene scene, Transform parent)
