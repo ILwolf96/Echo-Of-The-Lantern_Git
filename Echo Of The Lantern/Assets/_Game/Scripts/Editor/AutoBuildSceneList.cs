@@ -6,12 +6,8 @@ using UnityEditor;
 using UnityEditor.Build.Profile;
 using UnityEngine;
 
-
 namespace EchoOfTheLantern.EditorTools
 {
-    /// <summary>
-    /// Keeps the build scene list synchronized with the game's two canonical scenes.
-    /// </summary>
     [InitializeOnLoad]
     public static class AutoBuildSceneList
     {
@@ -20,12 +16,10 @@ namespace EchoOfTheLantern.EditorTools
         private const string SessionQueued = "EchoOfTheLantern.AutoBuildSceneList.Queued";
         private const string SessionRunning = "EchoOfTheLantern.AutoBuildSceneList.Running";
 
-
         static AutoBuildSceneList()
         {
             EditorApplication.delayCall += QueueRun;
         }
-
 
         internal static void QueueRun()
         {
@@ -34,34 +28,28 @@ namespace EchoOfTheLantern.EditorTools
                 return;
             }
 
-
             SessionState.SetBool(SessionQueued, true);
             EditorApplication.delayCall -= ExecuteQueuedRun;
             EditorApplication.delayCall += ExecuteQueuedRun;
         }
 
-
         private static void ExecuteQueuedRun()
         {
             EditorApplication.delayCall -= ExecuteQueuedRun;
-
 
             if (EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 return;
             }
 
-
             if (!SessionState.GetBool(SessionQueued, false))
             {
                 return;
             }
 
-
             SessionState.SetBool(SessionQueued, false);
             Run();
         }
-
 
         private static void Run()
         {
@@ -70,16 +58,13 @@ namespace EchoOfTheLantern.EditorTools
                 return;
             }
 
-
             SessionState.SetBool(SessionRunning, true);
-
 
             try
             {
                 EditorBuildSettingsScene[] scenes = BuildSceneArray();
                 EditorBuildSettings.scenes = scenes;
                 EditorBuildSettings.globalScenes = scenes;
-
 
                 BuildProfile activeProfile = BuildProfile.GetActiveBuildProfile();
                 if (activeProfile != null)
@@ -88,7 +73,6 @@ namespace EchoOfTheLantern.EditorTools
                     activeProfile.scenes = scenes;
                     EditorUtility.SetDirty(activeProfile);
                 }
-
 
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
@@ -103,7 +87,6 @@ namespace EchoOfTheLantern.EditorTools
             }
         }
 
-
         private static EditorBuildSettingsScene[] BuildSceneArray()
         {
             return new[]
@@ -113,14 +96,13 @@ namespace EchoOfTheLantern.EditorTools
             }.Where(scene => scene != null).ToArray();
         }
 
-
         private static EditorBuildSettingsScene CreateSceneEntry(string scenePath)
         {
-            if (!File.Exists(Path.GetFullPath(Path.Combine(Application.dataPath, "..", scenePath))))
+            string fullPath = Path.GetFullPath(Path.Combine(Application.dataPath, "..", scenePath));
+            if (!File.Exists(fullPath))
             {
                 return null;
             }
-
 
             return new EditorBuildSettingsScene(scenePath, true);
         }

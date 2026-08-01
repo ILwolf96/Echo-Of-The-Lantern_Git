@@ -1,6 +1,5 @@
 using UnityEngine;
 
-
 namespace EchoOfTheLantern.Runtime.Interactions
 {
     public sealed class BeaconInteractable : InteractableBase
@@ -10,27 +9,22 @@ namespace EchoOfTheLantern.Runtime.Interactions
         [SerializeField] private Sprite _activeSprite;
         [SerializeField] private bool _isActivated;
 
-
         protected override void Awake()
         {
             base.Awake();
-
 
             if (_renderer == null)
             {
                 _renderer = GetComponent<SpriteRenderer>();
             }
 
-
             ApplyVisualState();
         }
-
 
         public override bool CanInteract(PlayerInteractionController interactor)
         {
             return !_isActivated && interactor != null;
         }
-
 
         public override void Interact(PlayerInteractionController interactor)
         {
@@ -39,16 +33,13 @@ namespace EchoOfTheLantern.Runtime.Interactions
                 return;
             }
 
-
             _isActivated = true;
             ApplyVisualState();
-
 
             if (ObjectiveManager.Instance != null)
             {
                 ObjectiveManager.Instance.RegisterBeaconActivated();
             }
-
 
             if (UIManager.Instance != null)
             {
@@ -56,12 +47,10 @@ namespace EchoOfTheLantern.Runtime.Interactions
             }
         }
 
-
         public override string GetPrompt()
         {
             return _isActivated ? string.Empty : "Activate Beacon (E)";
         }
-
 
         private void ApplyVisualState()
         {
@@ -69,7 +58,6 @@ namespace EchoOfTheLantern.Runtime.Interactions
             {
                 return;
             }
-
 
             if (_isActivated && _activeSprite != null)
             {

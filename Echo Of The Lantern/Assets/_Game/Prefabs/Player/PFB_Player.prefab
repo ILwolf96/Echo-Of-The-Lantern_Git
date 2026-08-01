@@ -201,4 +201,5 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   _interactionKey: 101
+  _enableDebugLogs: 1
   _uiManager: {fileID: 0}

@@ -6,16 +6,8 @@ using EchoOfTheLantern.Runtime.Interactions;
 using UnityEditor;
 using UnityEngine;
 
-
 namespace EchoOfTheLantern.EditorTools
 {
-    /// <summary>
-    /// Builds prefabs from imported sprites.
-    /// Ground has no collider.
-    /// Walls do have colliders.
-    /// Player gets controller + interaction.
-    /// Beacons get active/inactive sprite bindings.
-    /// </summary>
     public static class AutoPrefabFactory
     {
         private const string PlayerRoot = "Assets/_Game/Prefabs/Player";
@@ -23,7 +15,6 @@ namespace EchoOfTheLantern.EditorTools
         private const string InteractablesRoot = "Assets/_Game/Prefabs/Interactables";
         private const string UIRoot = "Assets/_Game/Prefabs/UI";
         private const string EffectsRoot = "Assets/_Game/Prefabs/Effects";
-
 
         private const string SpritesEnv = "Assets/_Game/Art/Sprites/Environment";
         private const string SpritesPlayer = "Assets/_Game/Art/Sprites/Player";
@@ -33,10 +24,8 @@ namespace EchoOfTheLantern.EditorTools
         private const string SpritesIcons = "Assets/_Game/Art/Sprites/Icons";
         private const string PlaceholderRoot = "Assets/_Game/_Placeholders/Sprites";
 
-
         private const string SessionQueued = "EchoOfTheLantern.AutoPrefabFactory.Queued";
         private const string SessionRunning = "EchoOfTheLantern.AutoPrefabFactory.Running";
-
 
         private readonly struct Spec
         {
@@ -48,7 +37,6 @@ namespace EchoOfTheLantern.EditorTools
             public readonly int SortingOrder;
             public readonly Vector3 Scale;
             public readonly float ColliderScale;
-
 
             public Spec(string prefabPath, string spriteName, bool addCollider, bool isTrigger, bool addRigidbody2D, int sortingOrder, Vector3 scale, float colliderScale)
             {
@@ -63,20 +51,12 @@ namespace EchoOfTheLantern.EditorTools
             }
         }
 
-
         private static readonly Spec[] Specs =
         {
             new($"{EnvironmentRoot}/PFB_GroundTile.prefab", "SPR_Ground_Stone_Base.png", false, false, false, -10, Vector3.one, 1f),
             new($"{EnvironmentRoot}/PFB_WallTile.prefab", "SPR_Wall_Stone.png", true, false, false, -5, Vector3.one, 1f),
-            new($"{EnvironmentRoot}/PFB_Pillar.prefab", "SPR_Pillar.png", false, false, false, -2, Vector3.one * 0.95f, 1f),
-            new($"{EnvironmentRoot}/PFB_Pillar_Broken.prefab", "SPR_Pillar_Broken.png", false, false, false, -2, Vector3.one * 0.95f, 1f),
-            new($"{EnvironmentRoot}/PFB_Rubble_Small.prefab", "SPR_Rubble_Small.png", false, false, false, -2, Vector3.one * 0.75f, 1f),
-            new($"{EnvironmentRoot}/PFB_Rubble_Large.prefab", "SPR_Rubble_Large.png", false, false, false, -2, Vector3.one * 0.95f, 1f),
-            new($"{EnvironmentRoot}/PFB_Statue.prefab", "SPR_Statue.png", false, false, false, -2, Vector3.one * 1.05f, 1f),
-
 
             new($"{PlayerRoot}/PFB_Player.prefab", "SPR_Player_Idle.png", true, false, true, 0, Vector3.one * 0.72f, 0.78f),
-
 
             new($"{InteractablesRoot}/PFB_Beacon.prefab", "SPR_Beacon_Off.png", true, true, false, 3, Vector3.one * 1.08f, 0.95f),
             new($"{InteractablesRoot}/PFB_Shrine.prefab", "SPR_Shrine.png", true, true, false, 3, Vector3.one * 1.18f, 0.95f),
@@ -84,7 +64,6 @@ namespace EchoOfTheLantern.EditorTools
             new($"{InteractablesRoot}/PFB_Gate.prefab", "SPR_Gate_Closed.png", true, true, false, 3, Vector3.one * 1.1f, 0.95f),
             new($"{InteractablesRoot}/PFB_ShadowHazard.prefab", "SPR_Shadow_Hazard.png", true, true, false, 3, Vector3.one, 1f),
             new($"{InteractablesRoot}/PFB_RitualFragment.prefab", "SPR_Fragment.png", true, true, false, 3, Vector3.one * 0.55f, 0.9f),
-
 
             new($"{UIRoot}/PFB_UI_HUD.prefab", "SPR_UI_HUD.png", false, false, false, 100, Vector3.one, 1f),
             new($"{UIRoot}/PFB_UI_MenuBackground.prefab", "SPR_UI_MenuBackground.png", false, false, false, 100, Vector3.one, 1f),
@@ -98,7 +77,6 @@ namespace EchoOfTheLantern.EditorTools
             new($"{UIRoot}/PFB_UI_IconWarning.prefab", "ICO_Warning.png", false, false, false, 100, Vector3.one, 1f),
             new($"{UIRoot}/PFB_UI_IconRestart.prefab", "ICO_Restart.png", false, false, false, 100, Vector3.one, 1f),
 
-
             new($"{EffectsRoot}/PFB_FX_LanternGlow.prefab", "FX_LanternGlow.png", false, false, false, 0, Vector3.one, 1f),
             new($"{EffectsRoot}/PFB_FX_BeaconGlow.prefab", "FX_BeaconGlow.png", false, false, false, 0, Vector3.one * 1.15f, 1f),
             new($"{EffectsRoot}/PFB_FX_Dust.prefab", "FX_Dust.png", false, false, false, 0, Vector3.one, 1f),
@@ -107,7 +85,6 @@ namespace EchoOfTheLantern.EditorTools
             new($"{EffectsRoot}/PFB_FX_Mist.prefab", "FX_Mist.png", false, false, false, 0, Vector3.one * 2.2f, 1f),
         };
 
-
         internal static void QueueRun()
         {
             if (SessionState.GetBool(SessionRunning, false) || SessionState.GetBool(SessionQueued, false))
@@ -115,34 +92,28 @@ namespace EchoOfTheLantern.EditorTools
                 return;
             }
 
-
             SessionState.SetBool(SessionQueued, true);
             EditorApplication.delayCall -= ExecuteQueuedRun;
             EditorApplication.delayCall += ExecuteQueuedRun;
         }
 
-
         private static void ExecuteQueuedRun()
         {
             EditorApplication.delayCall -= ExecuteQueuedRun;
-
 
             if (EditorApplication.isPlayingOrWillChangePlaymode)
             {
                 return;
             }
 
-
             if (!SessionState.GetBool(SessionQueued, false))
             {
                 return;
             }
 
-
             SessionState.SetBool(SessionQueued, false);
             RunFactory();
         }
-
 
         private static void RunFactory()
         {
@@ -151,20 +122,16 @@ namespace EchoOfTheLantern.EditorTools
                 return;
             }
 
-
             SessionState.SetBool(SessionRunning, true);
-
 
             try
             {
                 AssetDatabase.StartAssetEditing();
 
-
                 foreach (Spec spec in Specs)
                 {
                     CreateOrUpdatePrefab(spec);
                 }
-
 
                 Debug.Log("[Echo of the Lantern] Prefab factory complete.");
             }
@@ -180,10 +147,8 @@ namespace EchoOfTheLantern.EditorTools
                 SessionState.SetBool(SessionRunning, false);
             }
 
-
             AutoSceneComposer.QueueRun();
         }
-
 
         private static void CreateOrUpdatePrefab(Spec spec)
         {
@@ -194,15 +159,12 @@ namespace EchoOfTheLantern.EditorTools
                 return;
             }
 
-
             GameObject temp = new GameObject(Path.GetFileNameWithoutExtension(spec.PrefabPath));
             temp.transform.localScale = spec.Scale;
-
 
             SpriteRenderer renderer = temp.AddComponent<SpriteRenderer>();
             renderer.sprite = sprite;
             renderer.sortingOrder = spec.SortingOrder;
-
 
             if (spec.AddRigidbody2D)
             {
@@ -216,14 +178,12 @@ namespace EchoOfTheLantern.EditorTools
                 body.bodyType = RigidbodyType2D.Dynamic;
             }
 
-
             if (spec.AddCollider)
             {
                 BoxCollider2D collider = temp.AddComponent<BoxCollider2D>();
                 collider.size = sprite.bounds.size * spec.ColliderScale;
                 collider.isTrigger = spec.IsTrigger;
             }
-
 
             if (spec.PrefabPath.EndsWith("PFB_Player.prefab", StringComparison.OrdinalIgnoreCase))
             {
@@ -244,7 +204,6 @@ namespace EchoOfTheLantern.EditorTools
                 temp.AddComponent<HazardZoneController>();
             }
 
-
             string folder = Path.GetDirectoryName(spec.PrefabPath)?.Replace("\\", "/") ?? string.Empty;
             if (!AssetDatabase.IsValidFolder(folder))
             {
@@ -253,11 +212,9 @@ namespace EchoOfTheLantern.EditorTools
                 return;
             }
 
-
             PrefabUtility.SaveAsPrefabAsset(temp, spec.PrefabPath);
             UnityEngine.Object.DestroyImmediate(temp);
         }
-
 
         private static void ApplyBeaconSprites(BeaconInteractable beacon, string inactiveSpriteName, string activeSpriteName)
         {
@@ -266,34 +223,28 @@ namespace EchoOfTheLantern.EditorTools
                 return;
             }
 
-
             SerializedObject so = new SerializedObject(beacon);
             SerializedProperty rendererProp = so.FindProperty("_renderer");
             SerializedProperty inactiveProp = so.FindProperty("_inactiveSprite");
             SerializedProperty activeProp = so.FindProperty("_activeSprite");
-
 
             if (rendererProp != null)
             {
                 rendererProp.objectReferenceValue = beacon.GetComponent<SpriteRenderer>();
             }
 
-
             if (inactiveProp != null)
             {
                 inactiveProp.objectReferenceValue = LoadSprite(inactiveSpriteName) ?? LoadPlaceholderSprite(inactiveSpriteName);
             }
-
 
             if (activeProp != null)
             {
                 activeProp.objectReferenceValue = LoadSprite(activeSpriteName) ?? LoadPlaceholderSprite(activeSpriteName);
             }
 
-
             so.ApplyModifiedPropertiesWithoutUndo();
         }
-
 
         private static Sprite LoadSprite(string fileName)
         {
@@ -311,10 +262,8 @@ namespace EchoOfTheLantern.EditorTools
                 }
             }
 
-
             return null;
         }
-
 
         private static Sprite LoadPlaceholderSprite(string fileName)
         {
@@ -322,14 +271,12 @@ namespace EchoOfTheLantern.EditorTools
             return string.IsNullOrEmpty(path) ? null : AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
-
         private static string FindAssetPathByFileName(string folder, string fileName)
         {
             if (!AssetDatabase.IsValidFolder(folder))
             {
                 return string.Empty;
             }
-
 
             string[] guids = AssetDatabase.FindAssets(Path.GetFileNameWithoutExtension(fileName), new[] { folder });
             foreach (string guid in guids)
@@ -340,7 +287,6 @@ namespace EchoOfTheLantern.EditorTools
                     return assetPath;
                 }
             }
-
 
             return string.Empty;
         }
