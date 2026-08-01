@@ -245,6 +245,9 @@ namespace EchoOfTheLantern.EditorTools
             EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Effects"), "FX_LanternGlow.png", 512, 512, new Color32(0, 0, 0, 0), new Color32(255, 192, 96, 220), true, 512f);
             EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Icons"), "ICO_Lantern.png", 128, 128, new Color32(54, 60, 70, 255), new Color32(255, 193, 96, 255), false, 128f);
 
+            // Added missing hazard visual placeholder texture
+            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Effects"), "SPR_Shadow_Hazard.png", 512, 512, new Color32(24, 24, 28, 255), new Color32(90, 40, 110, 255), true, 512f);
+
             EnsurePlaceholderAudio(Path.Combine(AudioRoot, "Ambient"), "AMB_ShrineNight.wav", 1f, 2f);
             EnsurePlaceholderAudio(Path.Combine(AudioRoot, "Gameplay"), "SFX_BeaconActivate.wav", 0.25f, 2f);
             EnsurePlaceholderAudio(Path.Combine(AudioRoot, "UI"), "UI_Click.wav", 0.1f, 2f);

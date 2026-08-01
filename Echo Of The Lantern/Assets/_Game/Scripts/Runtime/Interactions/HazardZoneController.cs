@@ -1,6 +1,5 @@
 using UnityEngine;
 
-
 namespace EchoOfTheLantern.Runtime.Interactions
 {
     [RequireComponent(typeof(Collider2D))]
@@ -10,16 +9,13 @@ namespace EchoOfTheLantern.Runtime.Interactions
         [SerializeField] private bool _disableAfterHit = true;
         [SerializeField] private GameObject _visualRoot;
 
-
         private bool _triggered;
-
 
         private void Awake()
         {
             Collider2D collider2D = GetComponent<Collider2D>();
             collider2D.isTrigger = true;
         }
-
 
         private void OnTriggerEnter2D(Collider2D other)
         {
@@ -28,26 +24,24 @@ namespace EchoOfTheLantern.Runtime.Interactions
                 return;
             }
 
-
             if (!other.TryGetComponent<PlayerController>(out _))
             {
                 return;
             }
 
-
             _triggered = true;
-
 
             if (_loseOnTouch && GameStateManager.Instance != null)
             {
                 GameStateManager.Instance.LoseGame();
             }
 
-
             if (_disableAfterHit && _visualRoot != null)
             {
                 _visualRoot.SetActive(false);
             }
+
+            Debug.Log("[HazardZoneController] Player hit hazard.", this);
         }
     }
 }
