@@ -6868,7 +6868,7 @@ MonoBehaviour:
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 56
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -7058,6 +7058,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EchoOfTheLantern.Runtime.RuntimeGameBootstrapper
   _startGameOnAwake: 1
+  _autoBindUiFromScene: 1
 --- !u!114 &1397067772
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9051,7 +9052,7 @@ MonoBehaviour:
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 56
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1

@@ -2,13 +2,11 @@ using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
 namespace EchoOfTheLantern.Runtime
 {
     public sealed class GameStateManager : MonoBehaviour
     {
         public static GameStateManager Instance { get; private set; }
-
 
         public enum GameState
         {
@@ -20,14 +18,11 @@ namespace EchoOfTheLantern.Runtime
             Lost
         }
 
-
         [SerializeField] private GameState _initialState = GameState.MainMenu;
         [SerializeField] private string _gameSceneName = "EchoOfTheLantern_Game";
         [SerializeField] private string _menuSceneName = "EchoOfTheLantern_Menu";
 
-
         public GameState CurrentState { get; private set; } = GameState.Boot;
-
 
         public event Action<GameState> StateChanged;
         public event Action GameStarted;
@@ -37,7 +32,6 @@ namespace EchoOfTheLantern.Runtime
         public event Action GameLost;
         public event Action GameRestarted;
 
-
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -46,17 +40,14 @@ namespace EchoOfTheLantern.Runtime
                 return;
             }
 
-
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-
 
         private void Start()
         {
             SetState(_initialState);
         }
-
 
         public void StartGame()
         {
@@ -65,7 +56,6 @@ namespace EchoOfTheLantern.Runtime
             GameStarted?.Invoke();
         }
 
-
         public void PauseGame()
         {
             if (CurrentState != GameState.Playing)
@@ -73,12 +63,10 @@ namespace EchoOfTheLantern.Runtime
                 return;
             }
 
-
             Time.timeScale = 0f;
             SetState(GameState.Paused);
             GamePaused?.Invoke();
         }
-
 
         public void ResumeGame()
         {
@@ -87,12 +75,10 @@ namespace EchoOfTheLantern.Runtime
                 return;
             }
 
-
             Time.timeScale = 1f;
             SetState(GameState.Playing);
             GameResumed?.Invoke();
         }
-
 
         public void WinGame()
         {
@@ -101,12 +87,21 @@ namespace EchoOfTheLantern.Runtime
                 return;
             }
 
-
             Time.timeScale = 0f;
             SetState(GameState.Won);
+
+            UIManager ui = UIManager.Resolve();
+            if (ui != null)
+            {
+                ui.ShowWinPanel();
+            }
+            else
+            {
+                Debug.LogWarning("[GameStateManager] UIManager not found while trying to show Win panel.");
+            }
+
             GameWon?.Invoke();
         }
-
 
         public void LoseGame()
         {
@@ -115,19 +110,27 @@ namespace EchoOfTheLantern.Runtime
                 return;
             }
 
-
             Time.timeScale = 0f;
             SetState(GameState.Lost);
+
+            UIManager ui = UIManager.Resolve();
+            if (ui != null)
+            {
+                ui.ShowLosePanel();
+            }
+            else
+            {
+                Debug.LogWarning("[GameStateManager] UIManager not found while trying to show Lose panel.");
+            }
+
             GameLost?.Invoke();
         }
-
 
         public void RestartGame()
         {
             Time.timeScale = 1f;
             SetState(GameState.Boot);
             GameRestarted?.Invoke();
-
 
             Scene active = SceneManager.GetActiveScene();
             if (active.name == _gameSceneName)
@@ -144,14 +147,12 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
-
         public void ReturnToMenu()
         {
             Time.timeScale = 1f;
             SetState(GameState.MainMenu);
             SceneManager.LoadScene(_menuSceneName);
         }
-
 
         public void BeginGameplayFromMenu()
         {
@@ -161,7 +162,6 @@ namespace EchoOfTheLantern.Runtime
             GameStarted?.Invoke();
         }
 
-
         public void SetState(GameState newState)
         {
             if (CurrentState == newState)
@@ -169,11 +169,9 @@ namespace EchoOfTheLantern.Runtime
                 return;
             }
 
-
             CurrentState = newState;
             StateChanged?.Invoke(CurrentState);
         }
-
 
         public bool IsPlaying => CurrentState == GameState.Playing;
         public bool IsPaused => CurrentState == GameState.Paused;

@@ -13,8 +13,6 @@ namespace EchoOfTheLantern.Runtime
         [SerializeField] private GameObject _winPanel;
         [SerializeField] private GameObject _losePanel;
 
-        private bool _isBound;
-
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -35,7 +33,6 @@ namespace EchoOfTheLantern.Runtime
             }
 
             Instance = FindFirstObjectByType<UIManager>(FindObjectsInactive.Include);
-
             if (Instance != null)
             {
                 return Instance;
@@ -54,7 +51,6 @@ namespace EchoOfTheLantern.Runtime
             _winPanel = winPanel;
             _losePanel = losePanel;
 
-            _isBound = true;
             HideEndPanels();
         }
 
@@ -68,8 +64,8 @@ namespace EchoOfTheLantern.Runtime
 
             if (GameStateManager.Instance != null)
             {
-                GameStateManager.Instance.GameWon += ShowWin;
-                GameStateManager.Instance.GameLost += ShowLose;
+                GameStateManager.Instance.GameWon += ShowWinPanel;
+                GameStateManager.Instance.GameLost += ShowLosePanel;
                 GameStateManager.Instance.GameRestarted += HideEndPanels;
             }
         }
@@ -84,8 +80,8 @@ namespace EchoOfTheLantern.Runtime
 
             if (GameStateManager.Instance != null)
             {
-                GameStateManager.Instance.GameWon -= ShowWin;
-                GameStateManager.Instance.GameLost -= ShowLose;
+                GameStateManager.Instance.GameWon -= ShowWinPanel;
+                GameStateManager.Instance.GameLost -= ShowLosePanel;
                 GameStateManager.Instance.GameRestarted -= HideEndPanels;
             }
         }
@@ -94,45 +90,54 @@ namespace EchoOfTheLantern.Runtime
         {
             TryAutoBindFromScene();
             RefreshObjectiveText();
-
             HideEndPanels();
         }
 
         public void TryAutoBindFromScene()
         {
-            if (_objectiveText == null)
+            if (_objectiveText != null && _promptText != null && _winPanel != null && _losePanel != null)
             {
-                GameObject obj = GameObject.Find("ObjectiveText");
-                if (obj != null)
+                return;
+            }
+
+            Transform[] allTransforms = FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+            for (int i = 0; i < allTransforms.Length; i++)
+            {
+                Transform t = allTransforms[i];
+                if (t == null)
                 {
-                    _objectiveText = obj.GetComponent<Text>();
+                    continue;
+                }
+
+                if (_objectiveText == null && t.name == "ObjectiveText")
+                {
+                    _objectiveText = t.GetComponent<Text>();
+                }
+                else if (_promptText == null && t.name == "PromptText")
+                {
+                    _promptText = t.GetComponent<Text>();
+                }
+                else if (_winPanel == null && t.name == "WinPanel")
+                {
+                    _winPanel = t.gameObject;
+                }
+                else if (_losePanel == null && t.name == "LosePanel")
+                {
+                    _losePanel = t.gameObject;
+                }
+
+                if (_objectiveText != null && _promptText != null && _winPanel != null && _losePanel != null)
+                {
+                    break;
                 }
             }
-
-            if (_promptText == null)
-            {
-                GameObject obj = GameObject.Find("PromptText");
-                if (obj != null)
-                {
-                    _promptText = obj.GetComponent<Text>();
-                }
-            }
-
-            if (_winPanel == null)
-            {
-                _winPanel = GameObject.Find("WinPanel");
-            }
-
-            if (_losePanel == null)
-            {
-                _losePanel = GameObject.Find("LosePanel");
-            }
-
-            _isBound = _objectiveText != null || _promptText != null || _winPanel != null || _losePanel != null;
         }
 
         public void SetInteractionPrompt(string prompt)
         {
+            TryAutoBindFromScene();
+
             if (_promptText != null)
             {
                 _promptText.text = prompt;
@@ -141,6 +146,8 @@ namespace EchoOfTheLantern.Runtime
 
         public void SetBeaconProgress(int activated, int required)
         {
+            TryAutoBindFromScene();
+
             if (_objectiveText != null)
             {
                 _objectiveText.text = $"Beacons: {activated}/{required}";
@@ -151,6 +158,36 @@ namespace EchoOfTheLantern.Runtime
         public void FlashObjectiveProgress()
         {
             RefreshObjectiveText();
+        }
+
+        public void ShowWinPanel()
+        {
+            TryAutoBindFromScene();
+
+            if (_winPanel != null)
+            {
+                _winPanel.SetActive(true);
+                Debug.Log("[UIManager] Win panel shown.", this);
+            }
+            else
+            {
+                Debug.LogWarning("[UIManager] Win panel not found.", this);
+            }
+        }
+
+        public void ShowLosePanel()
+        {
+            TryAutoBindFromScene();
+
+            if (_losePanel != null)
+            {
+                _losePanel.SetActive(true);
+                Debug.Log("[UIManager] Lose panel shown.", this);
+            }
+            else
+            {
+                Debug.LogWarning("[UIManager] Lose panel not found.", this);
+            }
         }
 
         public void HideEndPanels()
@@ -178,22 +215,6 @@ namespace EchoOfTheLantern.Runtime
         private void OnBeaconCountChanged(int activated, int required)
         {
             SetBeaconProgress(activated, required);
-        }
-
-        private void ShowWin()
-        {
-            if (_winPanel != null)
-            {
-                _winPanel.SetActive(true);
-            }
-        }
-
-        private void ShowLose()
-        {
-            if (_losePanel != null)
-            {
-                _losePanel.SetActive(true);
-            }
         }
     }
 }
