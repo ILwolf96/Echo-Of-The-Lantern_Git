@@ -1,7 +1,3 @@
-// =========================================================
-// FILE: UIManager.cs
-// PATH: Assets/_Game/Scripts/Runtime/UIManager.cs
-// =========================================================
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,6 +26,16 @@ namespace EchoOfTheLantern.Runtime
 
             Instance = this;
             DontDestroyOnLoad(gameObject);
+        }
+
+        public void Bind(Text objectiveText, Text promptText, GameObject winPanel, GameObject losePanel)
+        {
+            _objectiveText = objectiveText;
+            _promptText = promptText;
+            _winPanel = winPanel;
+            _losePanel = losePanel;
+
+            HideEndPanels();
         }
 
         private void OnEnable()
@@ -88,6 +94,19 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
+        public void HideEndPanels()
+        {
+            if (_winPanel != null)
+            {
+                _winPanel.SetActive(false);
+            }
+
+            if (_losePanel != null)
+            {
+                _losePanel.SetActive(false);
+            }
+        }
+
         private void OnBeaconCountChanged(int activated, int required)
         {
             if (_objectiveText != null)
@@ -109,19 +128,6 @@ namespace EchoOfTheLantern.Runtime
             if (_losePanel != null)
             {
                 _losePanel.SetActive(true);
-            }
-        }
-
-        private void HideEndPanels()
-        {
-            if (_winPanel != null)
-            {
-                _winPanel.SetActive(false);
-            }
-
-            if (_losePanel != null)
-            {
-                _losePanel.SetActive(false);
             }
         }
     }

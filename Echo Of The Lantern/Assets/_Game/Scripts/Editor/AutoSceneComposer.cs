@@ -100,8 +100,16 @@ namespace EchoOfTheLantern.EditorTools
 
             EnsureCamera(scene, false);
             EnsureEventSystem(scene);
-            EnsureCanvas(scene, "Canvas_Game");
-            EnsureGameSystems(scene);
+
+            GameObject systemsRoot = new GameObject("GameSystems");
+            SceneManager.MoveGameObjectToScene(systemsRoot, scene);
+
+            systemsRoot.AddComponent<GameStateManager>();
+            systemsRoot.AddComponent<ObjectiveManager>();
+            systemsRoot.AddComponent<AssetRegistry>();
+            systemsRoot.AddComponent<RuntimeGameBootstrapper>();
+
+            BuildUI(scene, systemsRoot.transform);
 
             GameObject sceneRoot = new GameObject("SceneRoot");
             SceneManager.MoveGameObjectToScene(sceneRoot, scene);
@@ -144,18 +152,115 @@ namespace EchoOfTheLantern.EditorTools
             EditorSceneManager.SaveScene(scene, GameScenePath);
         }
 
-        private static void EnsureGameSystems(Scene scene)
+        private static UIManager BuildUI(Scene scene, Transform systemsRoot)
         {
-            GameObject systemsRoot = GameObject.Find("GameSystems");
-            if (systemsRoot != null)
-                return;
+            GameObject canvasObject = new GameObject("Canvas");
+            SceneManager.MoveGameObjectToScene(canvasObject, scene);
 
-            systemsRoot = new GameObject("GameSystems");
-            SceneManager.MoveGameObjectToScene(systemsRoot, scene);
+            Canvas canvas = canvasObject.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 100;
 
-            systemsRoot.AddComponent<GameStateManager>();
-            systemsRoot.AddComponent<ObjectiveManager>();
-            systemsRoot.AddComponent<AssetRegistry>();
+            canvasObject.AddComponent<CanvasScaler>();
+            canvasObject.AddComponent<GraphicRaycaster>();
+
+            GameObject objectiveTextObj = CreateUIText(canvasObject.transform, "ObjectiveText", new Vector2(20f, -20f), "Beacons: 0/3", TextAnchor.UpperLeft, 24);
+            GameObject promptTextObj = CreateUIText(canvasObject.transform, "PromptText", new Vector2(0f, 40f), "", TextAnchor.LowerCenter, 24);
+
+            GameObject winPanel = CreateEndPanel(canvasObject.transform, "WinPanel", "YOU WIN");
+            GameObject losePanel = CreateEndPanel(canvasObject.transform, "LosePanel", "YOU LOSE");
+
+            winPanel.SetActive(false);
+            losePanel.SetActive(false);
+
+            UIManager uiManager = systemsRoot.GetComponent<UIManager>();
+            if (uiManager == null)
+            {
+                uiManager = systemsRoot.gameObject.AddComponent<UIManager>();
+            }
+
+            uiManager.Bind(
+                objectiveTextObj.GetComponent<Text>(),
+                promptTextObj.GetComponent<Text>(),
+                winPanel,
+                losePanel);
+
+            return uiManager;
+        }
+
+        private static GameObject CreateUIText(Transform parent, string name, Vector2 anchoredPosition, string text, TextAnchor anchor, int fontSize)
+        {
+            GameObject go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+
+            RectTransform rect = go.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = anchoredPosition;
+            rect.sizeDelta = new Vector2(600f, 80f);
+
+            Text uiText = go.AddComponent<Text>();
+            uiText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            uiText.fontSize = fontSize;
+            uiText.alignment = anchor;
+            uiText.color = Color.white;
+            uiText.text = text;
+
+            return go;
+        }
+
+        private static GameObject CreateEndPanel(Transform parent, string name, string message)
+        {
+            GameObject panel = new GameObject(name);
+            panel.transform.SetParent(parent, false);
+
+            RectTransform rect = panel.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            Image bg = panel.AddComponent<Image>();
+            bg.color = new Color(0f, 0f, 0f, 0.72f);
+
+            GameObject textObj = CreateUIText(panel.transform, $"{name}_Text", Vector2.zero, message, TextAnchor.MiddleCenter, 56);
+            textObj.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 80f);
+
+            GameObject buttonObj = CreateButton(panel.transform, $"{name}_RestartButton", "Restart", new Vector2(0f, -40f));
+            buttonObj.GetComponent<Button>().onClick.AddListener(() =>
+            {
+                if (GameStateManager.Instance != null)
+                {
+                    GameStateManager.Instance.RestartGame();
+                }
+            });
+
+            return panel;
+        }
+
+        private static GameObject CreateButton(Transform parent, string name, string label, Vector2 anchoredPosition)
+        {
+            GameObject buttonObj = new GameObject(name);
+            buttonObj.transform.SetParent(parent, false);
+
+            RectTransform rect = buttonObj.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = anchoredPosition;
+            rect.sizeDelta = new Vector2(240f, 60f);
+
+            Image image = buttonObj.AddComponent<Image>();
+            image.color = new Color(1f, 1f, 1f, 0.92f);
+
+            Button button = buttonObj.AddComponent<Button>();
+
+            GameObject labelObj = CreateUIText(buttonObj.transform, $"{name}_Label", Vector2.zero, label, TextAnchor.MiddleCenter, 28);
+            labelObj.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+            labelObj.GetComponent<RectTransform>().anchorMax = Vector2.one;
+            labelObj.GetComponent<RectTransform>().offsetMin = Vector2.zero;
+            labelObj.GetComponent<RectTransform>().offsetMax = Vector2.zero;
+
+            return buttonObj;
         }
 
         private static void BuildGroundGrid(Scene scene, Transform parent)
@@ -174,18 +279,27 @@ namespace EchoOfTheLantern.EditorTools
         private static void BuildBoundaryWalls(Scene scene, Transform parent)
         {
             GameObject wallPrefab = LoadPrefab("PFB_WallTile.prefab");
-            if (wallPrefab == null) return;
-
-            for (int x = -6; x <= 6; x++)
+            if (wallPrefab == null)
             {
-                Spawn(scene, wallPrefab, new Vector3(x, 5.5f, 0f), parent, $"Wall_Top_{x}");
-                Spawn(scene, wallPrefab, new Vector3(x, -5.5f, 0f), parent, $"Wall_Bottom_{x}");
+                Debug.LogWarning("Wall prefab missing. Cannot build perimeter walls.");
+                return;
             }
 
-            for (int y = -5; y <= 5; y++)
+            int width = 11;
+            int height = 9;
+            int startX = -(width / 2);
+            int startY = -(height / 2);
+
+            for (int x = 0; x < width; x++)
             {
-                Spawn(scene, wallPrefab, new Vector3(-6.5f, y, 0f), parent, $"Wall_Left_{y}");
-                Spawn(scene, wallPrefab, new Vector3(6.5f, y, 0f), parent, $"Wall_Right_{y}");
+                Spawn(scene, wallPrefab, new Vector3(startX + x, startY + height, 0f), parent, $"Wall_Top_{x}");
+                Spawn(scene, wallPrefab, new Vector3(startX + x, startY - 1, 0f), parent, $"Wall_Bottom_{x}");
+            }
+
+            for (int y = 0; y < height; y++)
+            {
+                Spawn(scene, wallPrefab, new Vector3(startX - 1, startY + y, 0f), parent, $"Wall_Left_{y}");
+                Spawn(scene, wallPrefab, new Vector3(startX + width, startY + y, 0f), parent, $"Wall_Right_{y}");
             }
         }
 

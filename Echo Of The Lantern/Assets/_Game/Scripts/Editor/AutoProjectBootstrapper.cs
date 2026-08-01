@@ -1,11 +1,13 @@
+// =========================================================
+// FILE: AutoProjectBootstrapper.cs
+// PATH: Assets/_Game/Scripts/Editor/AutoProjectBootstrapper.cs
+// =========================================================
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using UnityEditor;
-using UnityEditor.Callbacks;
 using UnityEngine;
 
 namespace EchoOfTheLantern.EditorTools
@@ -76,6 +78,7 @@ namespace EchoOfTheLantern.EditorTools
 
         private static readonly Dictionary<string, string> CanonicalFileTargets = new(StringComparer.OrdinalIgnoreCase)
         {
+            // Sprites
             ["SPR_Ground_Stone_Base.png"] = Path.Combine(SpritesRoot, "Environment").Replace("\\", "/"),
             ["SPR_Ground_Stone_Var01.png"] = Path.Combine(SpritesRoot, "Environment").Replace("\\", "/"),
             ["SPR_Ground_Stone_Var02.png"] = Path.Combine(SpritesRoot, "Environment").Replace("\\", "/"),
@@ -124,6 +127,7 @@ namespace EchoOfTheLantern.EditorTools
             ["FX_ShadowPulse.png"] = Path.Combine(SpritesRoot, "Effects").Replace("\\", "/"),
             ["FX_Mist.png"] = Path.Combine(SpritesRoot, "Effects").Replace("\\", "/"),
 
+            // Audio
             ["AMB_ShrineNight.wav"] = Path.Combine(AudioRoot, "Ambient").Replace("\\", "/"),
             ["SFX_Footstep_Stone.wav"] = Path.Combine(AudioRoot, "Gameplay").Replace("\\", "/"),
             ["SFX_Lantern.wav"] = Path.Combine(AudioRoot, "Gameplay").Replace("\\", "/"),
@@ -134,6 +138,7 @@ namespace EchoOfTheLantern.EditorTools
             ["SFX_Win.wav"] = Path.Combine(AudioRoot, "Effects").Replace("\\", "/"),
             ["SFX_Lose.wav"] = Path.Combine(AudioRoot, "Effects").Replace("\\", "/"),
 
+            // Materials
             ["MAT_Ground_Stone.mat"] = MaterialsRoot,
             ["MAT_Wall_Stone.mat"] = MaterialsRoot,
             ["MAT_Player.mat"] = MaterialsRoot,
@@ -144,11 +149,13 @@ namespace EchoOfTheLantern.EditorTools
             ["MAT_Glow.mat"] = MaterialsRoot,
             ["MAT_Mist.mat"] = MaterialsRoot,
 
+            // Atlases
             ["ATL_Environment.spriteatlas"] = AtlasesRoot,
             ["ATL_Interactables.spriteatlas"] = AtlasesRoot,
             ["ATL_UI.spriteatlas"] = AtlasesRoot,
             ["ATL_Effects.spriteatlas"] = AtlasesRoot,
 
+            // ScriptableObjects
             ["SO_GameConfig.asset"] = ScriptableObjectsRoot,
             ["SO_PlayerConfig.asset"] = ScriptableObjectsRoot,
             ["SO_LevelConfig.asset"] = ScriptableObjectsRoot,
@@ -160,21 +167,14 @@ namespace EchoOfTheLantern.EditorTools
         };
 
         [InitializeOnLoadMethod]
-        private static void OnEditorLoad() => QueueRun();
-
-        [DidReloadScripts]
-        private static void OnScriptsReloaded()
+        private static void OnEditorLoad()
         {
-            if (!EditorApplication.isPlayingOrWillChangePlaymode)
-                QueueRun();
+            QueueRun();
         }
 
         internal static void QueueRun()
         {
-            if (SessionState.GetBool(SessionKeyRunning, false))
-                return;
-
-            if (SessionState.GetBool(SessionKeyQueued, false))
+            if (SessionState.GetBool(SessionKeyRunning, false) || SessionState.GetBool(SessionKeyQueued, false))
                 return;
 
             SessionState.SetBool(SessionKeyQueued, true);
@@ -202,17 +202,12 @@ namespace EchoOfTheLantern.EditorTools
                 return;
 
             SessionState.SetBool(SessionKeyRunning, true);
-
             try
             {
                 AssetDatabase.StartAssetEditing();
-
                 EnsureFolderScaffold();
                 CreatePlaceholderAssetsIfMissing();
-                int moved = ReorganizeProjectAssets();
-                int cleaned = CleanupDuplicateRootFolders();
-
-                Debug.Log($"[Echo of the Lantern] Bootstrap complete. Moved: {moved}, cleaned duplicates: {cleaned}");
+                ReorganizeProjectAssets();
             }
             catch (Exception ex)
             {
@@ -237,12 +232,13 @@ namespace EchoOfTheLantern.EditorTools
 
         private static void CreatePlaceholderAssetsIfMissing()
         {
-            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Environment"), "SPR_Ground_Stone_Base.png", 512, 512, new Color32(96, 104, 118, 255), new Color32(134, 144, 160, 255), false);
-            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Player"), "SPR_Player_Idle.png", 512, 512, new Color32(86, 92, 102, 255), new Color32(214, 182, 110, 255), false);
-            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Interactables"), "SPR_Beacon_Off.png", 512, 512, new Color32(100, 100, 110, 255), new Color32(220, 170, 85, 255), false);
-            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "UI"), "SPR_UI_HUD.png", 1024, 256, new Color32(40, 46, 58, 255), new Color32(120, 130, 150, 255), false);
-            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Effects"), "FX_LanternGlow.png", 512, 512, new Color32(0, 0, 0, 0), new Color32(255, 192, 96, 220), true);
-            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Icons"), "ICO_Lantern.png", 128, 128, new Color32(54, 60, 70, 255), new Color32(255, 193, 96, 255), false);
+            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Environment"), "SPR_Ground_Stone_Base.png", 512, 512, new Color32(96, 104, 118, 255), new Color32(134, 144, 160, 255), false, 512f);
+            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Player"), "SPR_Player_Idle.png", 512, 512, new Color32(86, 92, 102, 255), new Color32(214, 182, 110, 255), false, 512f);
+            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Interactables"), "SPR_Beacon_Off.png", 512, 512, new Color32(100, 100, 110, 255), new Color32(220, 170, 85, 255), false, 512f);
+            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Interactables"), "SPR_Shrine.png", 1024, 1024, new Color32(90, 92, 100, 255), new Color32(220, 180, 90, 255), false, 1024f);
+            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "UI"), "SPR_UI_HUD.png", 1024, 256, new Color32(40, 46, 58, 255), new Color32(120, 130, 150, 255), false, 100f);
+            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Effects"), "FX_LanternGlow.png", 512, 512, new Color32(0, 0, 0, 0), new Color32(255, 192, 96, 220), true, 512f);
+            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Icons"), "ICO_Lantern.png", 128, 128, new Color32(54, 60, 70, 255), new Color32(255, 193, 96, 255), false, 128f);
 
             EnsurePlaceholderAudio(Path.Combine(AudioRoot, "Ambient"), "AMB_ShrineNight.wav", 1f, 2f);
             EnsurePlaceholderAudio(Path.Combine(AudioRoot, "Gameplay"), "SFX_BeaconActivate.wav", 0.25f, 2f);
@@ -256,11 +252,9 @@ namespace EchoOfTheLantern.EditorTools
             EnsurePlaceholderMaterial(Path.Combine(MaterialsRoot, "MAT_Glow.mat"));
         }
 
-        private static int ReorganizeProjectAssets()
+        private static void ReorganizeProjectAssets()
         {
-            int moved = 0;
             string[] guids = AssetDatabase.FindAssets(string.Empty, new[] { ProjectRoot });
-
             foreach (string guid in guids)
             {
                 string assetPath = AssetDatabase.GUIDToAssetPath(guid);
@@ -282,41 +276,14 @@ namespace EchoOfTheLantern.EditorTools
                     continue;
 
                 string error = AssetDatabase.MoveAsset(assetPath, targetPath);
-                if (string.IsNullOrEmpty(error))
-                    moved++;
-                else
+                if (!string.IsNullOrEmpty(error))
+                {
                     Debug.LogWarning($"Could not move {assetPath} -> {targetPath}: {error}");
+                }
             }
-
-            return moved;
         }
 
-        private static int CleanupDuplicateRootFolders()
-        {
-            int removed = 0;
-            string assetsRoot = Application.dataPath;
-
-            foreach (string physicalFolder in Directory.GetDirectories(assetsRoot, "_Game*", SearchOption.TopDirectoryOnly))
-            {
-                string folderName = Path.GetFileName(physicalFolder);
-                if (string.Equals(folderName, "_Game", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                string assetPath = "Assets/" + folderName;
-                if (!Directory.Exists(physicalFolder))
-                    continue;
-
-                if (Directory.EnumerateFileSystemEntries(physicalFolder).Any())
-                    continue;
-
-                if (AssetDatabase.DeleteAsset(assetPath))
-                    removed++;
-            }
-
-            return removed;
-        }
-
-        private static void EnsurePlaceholderTexture(string folderPath, string fileName, int width, int height, Color32 baseColor, Color32 accentColor, bool radialAlpha)
+        private static void EnsurePlaceholderTexture(string folderPath, string fileName, int width, int height, Color32 baseColor, Color32 accentColor, bool radialAlpha, float pixelsPerUnit)
         {
             EnsureFolder(folderPath);
             string assetPath = Path.Combine(folderPath, fileName).Replace("\\", "/");
@@ -351,29 +318,23 @@ namespace EchoOfTheLantern.EditorTools
             texture.Apply();
             File.WriteAllBytes(fullPath, texture.EncodeToPNG());
             UnityEngine.Object.DestroyImmediate(texture);
-            ImportAsSprite(assetPath, width);
+            ImportAsSprite(assetPath, pixelsPerUnit);
         }
 
-        private static void ImportAsSprite(string assetPath, int width)
+        private static void ImportAsSprite(string assetPath, float pixelsPerUnit)
         {
-            var importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
-            if (importer == null) return;
+            TextureImporter importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
+            if (importer == null)
+                return;
 
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;
-            importer.spritePixelsPerUnit = width switch
-            {
-                1024 => 256f,
-                512 => 128f,
-                256 => 64f,
-                128 => 32f,
-                _ => 100f
-            };
+            importer.spritePixelsPerUnit = pixelsPerUnit;
             importer.alphaIsTransparency = true;
             importer.mipmapEnabled = false;
             importer.filterMode = FilterMode.Bilinear;
 
-            var settings = new TextureImporterSettings();
+            TextureImporterSettings settings = new TextureImporterSettings();
             importer.ReadTextureSettings(settings);
             settings.spriteMeshType = SpriteMeshType.FullRect;
             importer.SetTextureSettings(settings);
@@ -399,12 +360,12 @@ namespace EchoOfTheLantern.EditorTools
             int fileSize = 36 + dataSize;
 
             using FileStream stream = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
-            using BinaryWriter writer = new BinaryWriter(stream, Encoding.ASCII);
+            using BinaryWriter writer = new BinaryWriter(stream, System.Text.Encoding.ASCII);
 
-            writer.Write(Encoding.ASCII.GetBytes("RIFF"));
+            writer.Write(System.Text.Encoding.ASCII.GetBytes("RIFF"));
             writer.Write(fileSize);
-            writer.Write(Encoding.ASCII.GetBytes("WAVE"));
-            writer.Write(Encoding.ASCII.GetBytes("fmt "));
+            writer.Write(System.Text.Encoding.ASCII.GetBytes("WAVE"));
+            writer.Write(System.Text.Encoding.ASCII.GetBytes("fmt "));
             writer.Write(16);
             writer.Write((short)1);
             writer.Write((short)channels);
@@ -412,7 +373,7 @@ namespace EchoOfTheLantern.EditorTools
             writer.Write(byteRate);
             writer.Write((short)blockAlign);
             writer.Write((short)bitsPerSample);
-            writer.Write(Encoding.ASCII.GetBytes("data"));
+            writer.Write(System.Text.Encoding.ASCII.GetBytes("data"));
             writer.Write(dataSize);
 
             for (int i = 0; i < sampleCount; i++)
@@ -422,16 +383,11 @@ namespace EchoOfTheLantern.EditorTools
         private static void EnsurePlaceholderMaterial(string materialPath)
         {
             EnsureFolder(Path.GetDirectoryName(materialPath)?.Replace("\\", "/") ?? MaterialsRoot);
-
             if (File.Exists(GetFullPath(materialPath)))
                 return;
 
             Shader shader = Shader.Find("Sprites/Default") ?? Shader.Find("Unlit/Texture");
-            Material material = new Material(shader)
-            {
-                name = Path.GetFileNameWithoutExtension(materialPath)
-            };
-
+            Material material = new Material(shader) { name = Path.GetFileNameWithoutExtension(materialPath) };
             AssetDatabase.CreateAsset(material, materialPath);
         }
 
@@ -439,9 +395,6 @@ namespace EchoOfTheLantern.EditorTools
         {
             folderPath = folderPath.Replace("\\", "/");
             if (AssetDatabase.IsValidFolder(folderPath))
-                return;
-
-            if (Directory.Exists(GetFullPath(folderPath)))
                 return;
 
             string parent = Path.GetDirectoryName(folderPath)?.Replace("\\", "/") ?? string.Empty;
@@ -458,34 +411,6 @@ namespace EchoOfTheLantern.EditorTools
         private static string GetFullPath(string assetPath)
         {
             return Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath));
-        }
-    }
-
-    public sealed class AutoProjectAssetPostprocessor : AssetPostprocessor
-    {
-        private static void OnPostprocessAllAssets(
-            string[] importedAssets,
-            string[] deletedAssets,
-            string[] movedAssets,
-            string[] movedFromAssetPaths)
-        {
-            if (AutoProjectBootstrapper.IsRunning)
-                return;
-
-            bool relevant = importedAssets.Any(IsRelevantPath) || movedAssets.Any(IsRelevantPath);
-            if (!relevant)
-                return;
-
-            AutoProjectBootstrapper.QueueRun();
-        }
-
-        private static bool IsRelevantPath(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-                return false;
-
-            string extension = Path.GetExtension(path).ToLowerInvariant();
-            return extension is ".png" or ".jpg" or ".jpeg" or ".tga" or ".psd" or ".wav" or ".mp3" or ".ogg" or ".mat" or ".asset" or ".spriteatlas";
         }
     }
 }

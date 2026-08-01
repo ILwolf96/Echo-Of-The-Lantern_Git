@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5032019246155844569}
   - component: {fileID: 7022190323455333396}
   - component: {fileID: 2554543812739300392}
+  - component: {fileID: 6515484533354300128}
   m_Layer: 0
   m_Name: PFB_Player
   m_TagString: Untagged
@@ -30,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.85, y: 0.85, z: 0.85}
+  m_LocalScale: {x: 0.72, y: 0.72, z: 0.72}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -84,12 +85,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7782013949726198322, guid: 66966b538de31a140a6e63856f9a1c34, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 66966b538de31a140a6e63856f9a1c34, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 5.12, y: 5.12}
+  m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -159,13 +160,13 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 5.12, y: 5.12}
-    newSize: {x: 5.12, y: 5.12}
+    oldSize: {x: 1, y: 1}
+    newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.45, y: 0.65}
+  m_Size: {x: 0.78, y: 0.78}
   m_EdgeRadius: 0
 --- !u!114 &2554543812739300392
 MonoBehaviour:
@@ -183,3 +184,21 @@ MonoBehaviour:
   _acceleration: 18
   _deceleration: 22
   _useLegacyInputFallback: 1
+--- !u!114 &6515484533354300128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2639182869221236605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78af626a0b985814cab58f0355b5e162, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EchoOfTheLantern.Runtime.PlayerInteractionController
+  _interactionRadius: 1.2
+  _interactableLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _interactionKey: 101
+  _uiManager: {fileID: 0}

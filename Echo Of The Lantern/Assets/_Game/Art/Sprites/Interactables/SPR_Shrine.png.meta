@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: ecb0c9ea2eeced94dad5f26f359b9914
+guid: 4e567cd5b29e09544ae53f0260c69312
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5551297658271437405
-    second: FX_LanternGlow_0
+      213: 8318897558256170171
+    second: SPR_Shrine_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 512
+  spritePixelsToUnits: 1024
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: FX_LanternGlow_0
+      name: SPR_Shrine_0
       rect:
         serializedVersion: 2
-        x: 2
-        y: 25
-        width: 509
-        height: 487
+        x: 0
+        y: 0
+        width: 1024
+        height: 1024
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3ade54c1134d5f2b0800000000000000
-      internalID: -5551297658271437405
+      spriteID: bb439baf049a27370800000000000000
+      internalID: 8318897558256170171
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      FX_LanternGlow_0: -5551297658271437405
+      SPR_Shrine_0: 8318897558256170171
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
