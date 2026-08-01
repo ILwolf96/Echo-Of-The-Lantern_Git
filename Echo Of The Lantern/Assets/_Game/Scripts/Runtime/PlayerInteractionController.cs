@@ -1,16 +1,9 @@
-// =========================================================
-// FILE: PlayerInteractionController.cs
-// PATH: Assets/_Game/Scripts/Runtime/PlayerInteractionController.cs
-// =========================================================
-using System.Collections.Generic;
 using EchoOfTheLantern.Runtime.Interactions;
 using UnityEngine;
 
+
 namespace EchoOfTheLantern.Runtime
 {
-    /// <summary>
-    /// Lets the player interact with the nearest valid interactable.
-    /// </summary>
     [RequireComponent(typeof(PlayerController))]
     public sealed class PlayerInteractionController : MonoBehaviour
     {
@@ -19,32 +12,23 @@ namespace EchoOfTheLantern.Runtime
         [SerializeField] private LayerMask _interactableLayers = ~0;
         [SerializeField] private KeyCode _interactionKey = KeyCode.E;
 
+
         [Header("References")]
         [SerializeField] private UIManager _uiManager;
 
-        private readonly List<Collider2D> _results = new List<Collider2D>(16);
-        private ContactFilter2D _contactFilter;
-        private PlayerController _playerController;
+
+        private readonly Collider2D[] _results = new Collider2D[16];
         private IInteractable _currentInteractable;
 
+
         private void Awake()
-        {
-            _playerController = GetComponent<PlayerController>();
-
-            // Initialize the ContactFilter2D with layer mask settings
-            _contactFilter = new ContactFilter2D();
-            _contactFilter.useLayerMask = true;
-            _contactFilter.layerMask = _interactableLayers;
-            _contactFilter.useTriggers = true; // Ensures trigger colliders are detected
-        }
-
-        private void Start()
         {
             if (_uiManager == null)
             {
                 _uiManager = FindFirstObjectByType<UIManager>();
             }
         }
+
 
         private void Update()
         {
@@ -54,7 +38,9 @@ namespace EchoOfTheLantern.Runtime
                 return;
             }
 
+
             RefreshNearestInteractable();
+
 
             if (Input.GetKeyDown(_interactionKey) && _currentInteractable != null)
             {
@@ -65,17 +51,15 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
+
         private void RefreshNearestInteractable()
         {
-            _results.Clear();
-
-            // Updated OverlapCircle supporting a List buffer via ContactFilter2D
-            Physics2D.OverlapCircle(transform.position, _interactionRadius, _contactFilter, _results);
-
+            int count = Physics2D.OverlapCircleNonAlloc(transform.position, _interactionRadius, _results, _interactableLayers);
             IInteractable best = null;
             float bestDistance = float.MaxValue;
 
-            for (int i = 0; i < _results.Count; i++)
+
+            for (int i = 0; i < count; i++)
             {
                 Collider2D hit = _results[i];
                 if (hit == null)
@@ -83,22 +67,26 @@ namespace EchoOfTheLantern.Runtime
                     continue;
                 }
 
-                IInteractable interactable = hit.GetComponentInParent<IInteractable>();
-                if (interactable == null || !interactable.CanInteract(this))
+
+                InteractableBase interactableBase = hit.GetComponentInParent<InteractableBase>();
+                if (interactableBase == null || !interactableBase.CanInteract(this))
                 {
                     continue;
                 }
+
 
                 float distance = Vector2.Distance(transform.position, hit.transform.position);
                 if (distance < bestDistance)
                 {
                     bestDistance = distance;
-                    best = interactable;
+                    best = interactableBase;
                 }
             }
 
+
             SetCurrentInteractable(best);
         }
+
 
         private void SetCurrentInteractable(IInteractable next)
         {
@@ -106,6 +94,7 @@ namespace EchoOfTheLantern.Runtime
             {
                 return;
             }
+
 
             _currentInteractable = next;
             if (_uiManager != null)

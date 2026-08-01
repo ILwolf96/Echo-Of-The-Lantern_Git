@@ -1,35 +1,27 @@
-// =========================================================
-// FILE: ObjectiveManager.cs
-// PATH: Assets/_Game/Scripts/Runtime/ObjectiveManager.cs
-// =========================================================
 using System;
 using UnityEngine;
 
+
 namespace EchoOfTheLantern.Runtime
 {
-    /// <summary>
-    /// Tracks the game's core objectives.
-    /// 
-    /// Responsibilities:
-    /// - Count activated beacons.
-    /// - Track whether the final shrine can be completed.
-    /// - Expose events for UI and gameplay systems.
-    /// - Remain decoupled from player and scene code.
-    /// </summary>
     public sealed class ObjectiveManager : MonoBehaviour
     {
         public static ObjectiveManager Instance { get; private set; }
 
+
         [Header("Objective Tuning")]
         [SerializeField, Min(1)] private int _requiredBeacons = 3;
+
 
         public int ActivatedBeacons { get; private set; }
         public bool AreAllBeaconsActivated => ActivatedBeacons >= _requiredBeacons;
         public bool ShrineCanBeCompleted { get; private set; }
 
+
         public event Action<int, int> BeaconCountChanged;
         public event Action AllBeaconsActivated;
         public event Action ShrineUnlocked;
+
 
         private void Awake()
         {
@@ -39,9 +31,11 @@ namespace EchoOfTheLantern.Runtime
                 return;
             }
 
+
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
+
 
         private void OnEnable()
         {
@@ -52,6 +46,7 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
+
         private void OnDisable()
         {
             if (GameStateManager.Instance != null)
@@ -61,6 +56,7 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
+
         public void RegisterBeaconActivated()
         {
             if (AreAllBeaconsActivated)
@@ -68,8 +64,10 @@ namespace EchoOfTheLantern.Runtime
                 return;
             }
 
+
             ActivatedBeacons = Mathf.Clamp(ActivatedBeacons + 1, 0, _requiredBeacons);
             BeaconCountChanged?.Invoke(ActivatedBeacons, _requiredBeacons);
+
 
             if (AreAllBeaconsActivated)
             {
@@ -78,6 +76,7 @@ namespace EchoOfTheLantern.Runtime
                 ShrineUnlocked?.Invoke();
             }
         }
+
 
         public void ResetObjectives()
         {

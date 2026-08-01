@@ -1,20 +1,20 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+
 namespace EchoOfTheLantern.Runtime
 {
-    /// <summary>
-    /// Minimal HUD and status display.
-    /// </summary>
     public sealed class UIManager : MonoBehaviour
     {
         public static UIManager Instance { get; private set; }
+
 
         [Header("Optional Scene References")]
         [SerializeField] private Text _objectiveText;
         [SerializeField] private Text _promptText;
         [SerializeField] private GameObject _winPanel;
         [SerializeField] private GameObject _losePanel;
+
 
         private void Awake()
         {
@@ -24,9 +24,11 @@ namespace EchoOfTheLantern.Runtime
                 return;
             }
 
+
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
+
 
         public void Bind(Text objectiveText, Text promptText, GameObject winPanel, GameObject losePanel)
         {
@@ -34,9 +36,9 @@ namespace EchoOfTheLantern.Runtime
             _promptText = promptText;
             _winPanel = winPanel;
             _losePanel = losePanel;
-
             HideEndPanels();
         }
+
 
         private void OnEnable()
         {
@@ -44,6 +46,7 @@ namespace EchoOfTheLantern.Runtime
             {
                 ObjectiveManager.Instance.BeaconCountChanged += OnBeaconCountChanged;
             }
+
 
             if (GameStateManager.Instance != null)
             {
@@ -53,12 +56,14 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
+
         private void OnDisable()
         {
             if (ObjectiveManager.Instance != null)
             {
                 ObjectiveManager.Instance.BeaconCountChanged -= OnBeaconCountChanged;
             }
+
 
             if (GameStateManager.Instance != null)
             {
@@ -68,6 +73,7 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
+
         private void Start()
         {
             if (_objectiveText != null && ObjectiveManager.Instance != null)
@@ -75,8 +81,10 @@ namespace EchoOfTheLantern.Runtime
                 OnBeaconCountChanged(ObjectiveManager.Instance.ActivatedBeacons, 3);
             }
 
+
             HideEndPanels();
         }
+
 
         public void SetInteractionPrompt(string prompt)
         {
@@ -86,6 +94,7 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
+
         public void FlashObjectiveProgress()
         {
             if (_objectiveText != null)
@@ -94,6 +103,7 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
+
         public void HideEndPanels()
         {
             if (_winPanel != null)
@@ -101,11 +111,13 @@ namespace EchoOfTheLantern.Runtime
                 _winPanel.SetActive(false);
             }
 
+
             if (_losePanel != null)
             {
                 _losePanel.SetActive(false);
             }
         }
+
 
         private void OnBeaconCountChanged(int activated, int required)
         {
@@ -115,6 +127,7 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
+
         private void ShowWin()
         {
             if (_winPanel != null)
@@ -122,6 +135,7 @@ namespace EchoOfTheLantern.Runtime
                 _winPanel.SetActive(true);
             }
         }
+
 
         private void ShowLose()
         {

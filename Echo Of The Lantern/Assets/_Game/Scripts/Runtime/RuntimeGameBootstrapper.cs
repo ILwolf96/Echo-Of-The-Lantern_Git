@@ -1,14 +1,15 @@
 using UnityEngine;
 
+
 namespace EchoOfTheLantern.Runtime
 {
     /// <summary>
-    /// Starts the actual playable session when the game scene loads.
-    /// This is the missing piece that lets the minimal loop enter Playing state automatically.
+    /// Starts the playable run automatically when the game scene loads.
     /// </summary>
     public sealed class RuntimeGameBootstrapper : MonoBehaviour
     {
         [SerializeField] private bool _startGameOnAwake = true;
+
 
         private void Start()
         {
@@ -16,6 +17,7 @@ namespace EchoOfTheLantern.Runtime
             {
                 return;
             }
+
 
             if (GameStateManager.Instance != null)
             {
@@ -25,6 +27,7 @@ namespace EchoOfTheLantern.Runtime
             {
                 Debug.LogError("[RuntimeGameBootstrapper] GameStateManager is missing.");
             }
+
 
             if (UIManager.Instance != null)
             {

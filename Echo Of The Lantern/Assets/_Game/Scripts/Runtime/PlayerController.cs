@@ -1,9 +1,5 @@
-// =========================================================
-// FILE: PlayerController.cs
-// PATH: Assets/_Game/Scripts/Runtime/PlayerController.cs
-// =========================================================
-
 using UnityEngine;
+
 
 namespace EchoOfTheLantern.Runtime
 {
@@ -18,15 +14,19 @@ namespace EchoOfTheLantern.Runtime
         [SerializeField, Min(0f)] private float _acceleration = 18f;
         [SerializeField, Min(0f)] private float _deceleration = 22f;
 
+
         [Header("Input")]
         [SerializeField] private bool _useLegacyInputFallback = true;
+
 
         private Rigidbody2D _body;
         private Vector2 _moveInput;
         private Vector2 _currentVelocity;
 
+
         public Vector2 MoveInput => _moveInput;
         public Vector2 CurrentVelocity => _currentVelocity;
+
 
         private void Awake()
         {
@@ -34,13 +34,14 @@ namespace EchoOfTheLantern.Runtime
             _body.gravityScale = 0f;
             _body.constraints = RigidbodyConstraints2D.FreezeRotation;
 
-            // Ensure the Rigidbody is set to Dynamic for velocity-based movement
+
             if (_body.bodyType != RigidbodyType2D.Dynamic)
             {
                 Debug.LogWarning($"[PlayerController] Rigidbody2D bodyType is not Dynamic on {gameObject.name}. Changing to Dynamic for movement.", this);
                 _body.bodyType = RigidbodyType2D.Dynamic;
             }
         }
+
 
         private void Update()
         {
@@ -50,20 +51,23 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
+
         private void FixedUpdate()
         {
             Vector2 targetVelocity = _moveInput.normalized * _moveSpeed;
             float rate = _moveInput.sqrMagnitude > 0.001f ? _acceleration : _deceleration;
 
-            _currentVelocity = Vector2.MoveTowards(_currentVelocity, targetVelocity, rate * Time.fixedDeltaTime);
 
+            _currentVelocity = Vector2.MoveTowards(_currentVelocity, targetVelocity, rate * Time.fixedDeltaTime);
             SetRigidbodyVelocity(_currentVelocity);
         }
+
 
         public void SetMoveInput(Vector2 moveInput)
         {
             _moveInput = Vector2.ClampMagnitude(moveInput, 1f);
         }
+
 
         public void StopMovement()
         {
@@ -72,12 +76,14 @@ namespace EchoOfTheLantern.Runtime
             SetRigidbodyVelocity(Vector2.zero);
         }
 
+
         private void ReadLegacyMovementInput()
         {
             float x = Input.GetAxisRaw("Horizontal");
             float y = Input.GetAxisRaw("Vertical");
             SetMoveInput(new Vector2(x, y));
         }
+
 
         private void SetRigidbodyVelocity(Vector2 velocity)
         {
