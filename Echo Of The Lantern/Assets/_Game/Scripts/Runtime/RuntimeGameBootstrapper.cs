@@ -1,37 +1,40 @@
 using UnityEngine;
 
-
 namespace EchoOfTheLantern.Runtime
 {
     /// <summary>
-    /// Starts the playable run automatically when the game scene loads.
+    /// Ensures the runtime managers exist and binds the scene UI after the game scene loads.
     /// </summary>
     public sealed class RuntimeGameBootstrapper : MonoBehaviour
     {
         [SerializeField] private bool _startGameOnAwake = true;
-
+        [SerializeField] private bool _autoBindUiFromScene = true;
 
         private void Start()
         {
-            if (!_startGameOnAwake)
+            GameStateManager gameState = GameStateManager.Instance != null
+                ? GameStateManager.Instance
+                : FindFirstObjectByType<GameStateManager>(FindObjectsInactive.Include);
+
+            if (gameState == null)
             {
-                return;
+                GameObject gs = new GameObject("GameStateManager");
+                gameState = gs.AddComponent<GameStateManager>();
             }
 
+            ObjectiveManager objectiveManager = ObjectiveManager.Resolve();
+            UIManager ui = UIManager.Resolve();
 
-            if (GameStateManager.Instance != null)
+            if (_autoBindUiFromScene && ui != null)
             {
-                GameStateManager.Instance.StartGame();
+                ui.TryAutoBindFromScene();
+                ui.HideEndPanels();
+                ui.FlashObjectiveProgress();
             }
-            else
-            {
-                Debug.LogError("[RuntimeGameBootstrapper] GameStateManager is missing.");
-            }
 
-
-            if (UIManager.Instance != null)
+            if (_startGameOnAwake && gameState != null)
             {
-                UIManager.Instance.HideEndPanels();
+                gameState.StartGame();
             }
         }
     }

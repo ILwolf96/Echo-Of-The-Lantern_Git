@@ -15,12 +15,10 @@ namespace EchoOfTheLantern.Runtime
         [Header("References")]
         [SerializeField] private UIManager _uiManager;
 
-        private PlayerController _playerController;
         private IInteractable _currentInteractable;
 
         private void Awake()
         {
-            _playerController = GetComponent<PlayerController>();
             if (_uiManager == null)
             {
                 _uiManager = FindFirstObjectByType<UIManager>();

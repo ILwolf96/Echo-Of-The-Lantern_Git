@@ -13,6 +13,8 @@ namespace EchoOfTheLantern.Runtime
         [SerializeField] private GameObject _winPanel;
         [SerializeField] private GameObject _losePanel;
 
+        private bool _isBound;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -25,20 +27,43 @@ namespace EchoOfTheLantern.Runtime
             DontDestroyOnLoad(gameObject);
         }
 
+        public static UIManager Resolve()
+        {
+            if (Instance != null)
+            {
+                return Instance;
+            }
+
+            Instance = FindFirstObjectByType<UIManager>(FindObjectsInactive.Include);
+
+            if (Instance != null)
+            {
+                return Instance;
+            }
+
+            GameObject go = new GameObject("UIManager");
+            Instance = go.AddComponent<UIManager>();
+            DontDestroyOnLoad(go);
+            return Instance;
+        }
+
         public void Bind(Text objectiveText, Text promptText, GameObject winPanel, GameObject losePanel)
         {
             _objectiveText = objectiveText;
             _promptText = promptText;
             _winPanel = winPanel;
             _losePanel = losePanel;
+
+            _isBound = true;
             HideEndPanels();
         }
 
         private void OnEnable()
         {
-            if (ObjectiveManager.Instance != null)
+            ObjectiveManager objectiveManager = ObjectiveManager.Resolve();
+            if (objectiveManager != null)
             {
-                ObjectiveManager.Instance.BeaconCountChanged += OnBeaconCountChanged;
+                objectiveManager.BeaconCountChanged += OnBeaconCountChanged;
             }
 
             if (GameStateManager.Instance != null)
@@ -51,9 +76,10 @@ namespace EchoOfTheLantern.Runtime
 
         private void OnDisable()
         {
-            if (ObjectiveManager.Instance != null)
+            ObjectiveManager objectiveManager = ObjectiveManager.Resolve();
+            if (objectiveManager != null)
             {
-                ObjectiveManager.Instance.BeaconCountChanged -= OnBeaconCountChanged;
+                objectiveManager.BeaconCountChanged -= OnBeaconCountChanged;
             }
 
             if (GameStateManager.Instance != null)
@@ -66,12 +92,43 @@ namespace EchoOfTheLantern.Runtime
 
         private void Start()
         {
-            if (_objectiveText != null && ObjectiveManager.Instance != null)
-            {
-                OnBeaconCountChanged(ObjectiveManager.Instance.ActivatedBeacons, 3);
-            }
+            TryAutoBindFromScene();
+            RefreshObjectiveText();
 
             HideEndPanels();
+        }
+
+        public void TryAutoBindFromScene()
+        {
+            if (_objectiveText == null)
+            {
+                GameObject obj = GameObject.Find("ObjectiveText");
+                if (obj != null)
+                {
+                    _objectiveText = obj.GetComponent<Text>();
+                }
+            }
+
+            if (_promptText == null)
+            {
+                GameObject obj = GameObject.Find("PromptText");
+                if (obj != null)
+                {
+                    _promptText = obj.GetComponent<Text>();
+                }
+            }
+
+            if (_winPanel == null)
+            {
+                _winPanel = GameObject.Find("WinPanel");
+            }
+
+            if (_losePanel == null)
+            {
+                _losePanel = GameObject.Find("LosePanel");
+            }
+
+            _isBound = _objectiveText != null || _promptText != null || _winPanel != null || _losePanel != null;
         }
 
         public void SetInteractionPrompt(string prompt)
@@ -82,12 +139,18 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
-        public void FlashObjectiveProgress()
+        public void SetBeaconProgress(int activated, int required)
         {
             if (_objectiveText != null)
             {
+                _objectiveText.text = $"Beacons: {activated}/{required}";
                 _objectiveText.color = Color.white;
             }
+        }
+
+        public void FlashObjectiveProgress()
+        {
+            RefreshObjectiveText();
         }
 
         public void HideEndPanels()
@@ -103,12 +166,18 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
+        private void RefreshObjectiveText()
+        {
+            ObjectiveManager objectiveManager = ObjectiveManager.Resolve();
+            if (_objectiveText != null && objectiveManager != null)
+            {
+                _objectiveText.text = $"Beacons: {objectiveManager.ActivatedBeacons}/3";
+            }
+        }
+
         private void OnBeaconCountChanged(int activated, int required)
         {
-            if (_objectiveText != null)
-            {
-                _objectiveText.text = $"Beacons: {activated}/{required}";
-            }
+            SetBeaconProgress(activated, required);
         }
 
         private void ShowWin()

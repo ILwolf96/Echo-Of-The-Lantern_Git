@@ -36,15 +36,27 @@ namespace EchoOfTheLantern.Runtime.Interactions
             _isActivated = true;
             ApplyVisualState();
 
-            if (ObjectiveManager.Instance != null)
+            ObjectiveManager objectiveManager = ObjectiveManager.Resolve();
+            if (objectiveManager != null)
             {
-                ObjectiveManager.Instance.RegisterBeaconActivated();
+                objectiveManager.RegisterBeaconActivated();
+            }
+            else
+            {
+                Debug.LogError("[BeaconInteractable] ObjectiveManager is missing even after Resolve().", this);
             }
 
-            if (UIManager.Instance != null)
+            UIManager ui = UIManager.Resolve();
+            if (ui != null)
             {
-                UIManager.Instance.FlashObjectiveProgress();
+                ui.FlashObjectiveProgress();
             }
+            else
+            {
+                Debug.LogWarning("[BeaconInteractable] UIManager is missing even after Resolve().", this);
+            }
+
+            Debug.Log("[BeaconInteractable] Beacon activated.", this);
         }
 
         public override string GetPrompt()

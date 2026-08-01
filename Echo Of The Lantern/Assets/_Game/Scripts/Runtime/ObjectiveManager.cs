@@ -1,27 +1,22 @@
 using System;
 using UnityEngine;
 
-
 namespace EchoOfTheLantern.Runtime
 {
     public sealed class ObjectiveManager : MonoBehaviour
     {
         public static ObjectiveManager Instance { get; private set; }
 
-
         [Header("Objective Tuning")]
         [SerializeField, Min(1)] private int _requiredBeacons = 3;
-
 
         public int ActivatedBeacons { get; private set; }
         public bool AreAllBeaconsActivated => ActivatedBeacons >= _requiredBeacons;
         public bool ShrineCanBeCompleted { get; private set; }
 
-
         public event Action<int, int> BeaconCountChanged;
         public event Action AllBeaconsActivated;
         public event Action ShrineUnlocked;
-
 
         private void Awake()
         {
@@ -31,11 +26,9 @@ namespace EchoOfTheLantern.Runtime
                 return;
             }
 
-
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-
 
         private void OnEnable()
         {
@@ -46,7 +39,6 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
-
         private void OnDisable()
         {
             if (GameStateManager.Instance != null)
@@ -56,6 +48,30 @@ namespace EchoOfTheLantern.Runtime
             }
         }
 
+        private void Start()
+        {
+            BeaconCountChanged?.Invoke(ActivatedBeacons, _requiredBeacons);
+        }
+
+        public static ObjectiveManager Resolve()
+        {
+            if (Instance != null)
+            {
+                return Instance;
+            }
+
+            Instance = FindFirstObjectByType<ObjectiveManager>(FindObjectsInactive.Include);
+
+            if (Instance != null)
+            {
+                return Instance;
+            }
+
+            GameObject go = new GameObject("ObjectiveManager");
+            Instance = go.AddComponent<ObjectiveManager>();
+            DontDestroyOnLoad(go);
+            return Instance;
+        }
 
         public void RegisterBeaconActivated()
         {
@@ -64,25 +80,41 @@ namespace EchoOfTheLantern.Runtime
                 return;
             }
 
-
             ActivatedBeacons = Mathf.Clamp(ActivatedBeacons + 1, 0, _requiredBeacons);
+            Debug.Log($"[ObjectiveManager] Beacon activated: {ActivatedBeacons}/{_requiredBeacons}", this);
+
             BeaconCountChanged?.Invoke(ActivatedBeacons, _requiredBeacons);
 
+            UIManager ui = UIManager.Resolve();
+            if (ui != null)
+            {
+                ui.SetBeaconProgress(ActivatedBeacons, _requiredBeacons);
+            }
 
             if (AreAllBeaconsActivated)
             {
                 ShrineCanBeCompleted = true;
+                Debug.Log("[ObjectiveManager] All beacons activated. Shrine unlocked.", this);
+
                 AllBeaconsActivated?.Invoke();
                 ShrineUnlocked?.Invoke();
             }
         }
 
-
         public void ResetObjectives()
         {
             ActivatedBeacons = 0;
             ShrineCanBeCompleted = false;
+
+            Debug.Log("[ObjectiveManager] Objectives reset.", this);
+
             BeaconCountChanged?.Invoke(ActivatedBeacons, _requiredBeacons);
+
+            UIManager ui = UIManager.Resolve();
+            if (ui != null)
+            {
+                ui.SetBeaconProgress(ActivatedBeacons, _requiredBeacons);
+            }
         }
     }
 }

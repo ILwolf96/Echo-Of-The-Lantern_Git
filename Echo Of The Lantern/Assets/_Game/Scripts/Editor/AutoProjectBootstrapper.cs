@@ -235,11 +235,12 @@ namespace EchoOfTheLantern.EditorTools
             EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Environment"), "SPR_Ground_Stone_Base.png", 512, 512, new Color32(96, 104, 118, 255), new Color32(134, 144, 160, 255), false, 512f);
             EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Player"), "SPR_Player_Idle.png", 512, 512, new Color32(86, 92, 102, 255), new Color32(214, 182, 110, 255), false, 512f);
 
+            // Required beacon states and wall placeholders for the prefab factory
             EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Interactables"), "SPR_Beacon_Off.png", 512, 512, new Color32(100, 100, 110, 255), new Color32(220, 170, 85, 255), false, 512f);
             EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Interactables"), "SPR_Beacon_On.png", 512, 512, new Color32(120, 110, 80, 255), new Color32(255, 215, 120, 255), true, 512f);
-            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Interactables"), "SPR_Shrine.png", 1024, 1024, new Color32(90, 92, 100, 255), new Color32(220, 180, 90, 255), false, 1024f);
-
             EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Environment"), "SPR_Wall_Stone.png", 512, 512, new Color32(92, 98, 108, 255), new Color32(126, 132, 144, 255), false, 512f);
+
+            EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Interactables"), "SPR_Shrine.png", 1024, 1024, new Color32(90, 92, 100, 255), new Color32(220, 180, 90, 255), false, 1024f);
             EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "UI"), "SPR_UI_HUD.png", 1024, 256, new Color32(40, 46, 58, 255), new Color32(120, 130, 150, 255), false, 100f);
             EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Effects"), "FX_LanternGlow.png", 512, 512, new Color32(0, 0, 0, 0), new Color32(255, 192, 96, 220), true, 512f);
             EnsurePlaceholderTexture(Path.Combine(SpritesRoot, "Icons"), "ICO_Lantern.png", 128, 128, new Color32(54, 60, 70, 255), new Color32(255, 193, 96, 255), false, 128f);
