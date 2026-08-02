@@ -52,6 +52,24 @@ namespace EchoOfTheLantern.Runtime
         public void StartGame()
         {
             Time.timeScale = 1f;
+
+            ObjectiveManager objectiveManager = ObjectiveManager.Resolve();
+            if (objectiveManager != null)
+            {
+                objectiveManager.ResetObjectives();
+            }
+
+            UIManager ui = UIManager.Resolve();
+            if (ui != null)
+            {
+                ui.TryAutoBindFromScene();
+                ui.HideEndPanels();
+                if (objectiveManager != null)
+                {
+                    ui.SetBeaconProgress(objectiveManager.ActivatedBeacons, 3);
+                }
+            }
+
             SetState(GameState.Playing);
             GameStarted?.Invoke();
         }
@@ -157,9 +175,7 @@ namespace EchoOfTheLantern.Runtime
         public void BeginGameplayFromMenu()
         {
             Time.timeScale = 1f;
-            SetState(GameState.Playing);
             SceneManager.LoadScene(_gameSceneName);
-            GameStarted?.Invoke();
         }
 
         public void SetState(GameState newState)
