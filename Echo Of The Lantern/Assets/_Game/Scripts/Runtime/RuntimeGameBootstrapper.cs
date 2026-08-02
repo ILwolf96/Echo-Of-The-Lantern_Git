@@ -1,70 +1,43 @@
-using System.Collections;
 using UnityEngine;
 
 namespace EchoOfTheLantern.Runtime
 {
     /// <summary>
-    /// Rebinds the scene after load and starts the game one frame later so the new scene objects exist.
-    /// This is important after restart and when entering the game scene directly.
+    /// Safety bootstrap only. Scene state is now driven by GameStateManager scene-loaded handling.
     /// </summary>
     public sealed class RuntimeGameBootstrapper : MonoBehaviour
     {
-        [SerializeField] private bool _startGameOnAwake = true;
-        [SerializeField] private bool _autoBindUiFromScene = true;
+        [SerializeField] private bool _bindUiOnStart = true;
         [SerializeField] private bool _debugLogs = true;
-
-        private Coroutine _bootstrapRoutine;
 
         private void Start()
         {
-            if (_bootstrapRoutine != null)
-            {
-                StopCoroutine(_bootstrapRoutine);
-            }
-
-            _bootstrapRoutine = StartCoroutine(BootstrapNextFrame());
-        }
-
-        private IEnumerator BootstrapNextFrame()
-        {
-            yield return null;
-
-            GameStateManager gameState = GameStateManager.Instance != null
+            GameStateManager gsm = GameStateManager.Instance != null
                 ? GameStateManager.Instance
                 : FindFirstObjectByType<GameStateManager>(FindObjectsInactive.Include);
 
-            if (gameState == null)
+            if (gsm == null)
             {
-                GameObject gs = new GameObject("GameStateManager");
-                gameState = gs.AddComponent<GameStateManager>();
-                DontDestroyOnLoad(gs);
+                GameObject go = new GameObject("GameStateManager");
+                gsm = go.AddComponent<GameStateManager>();
             }
 
-            ObjectiveManager objectiveManager = ObjectiveManager.Resolve();
-            UIManager ui = UIManager.Resolve();
+            gsm.InitializeCurrentScene();
 
-            if (_autoBindUiFromScene && ui != null)
+            if (_bindUiOnStart)
             {
-                ui.TryAutoBindFromScene();
-                ui.HideEndPanels();
-
-                if (objectiveManager != null)
+                UIManager ui = UIManager.Resolve();
+                if (ui != null)
                 {
-                    ui.SetBeaconProgress(objectiveManager.ActivatedBeacons, 3);
+                    ui.TryAutoBindFromScene();
+                    ui.HideEndPanels();
                 }
             }
 
-            if (_startGameOnAwake && gameState != null)
+            if (_debugLogs)
             {
-                if (_debugLogs)
-                {
-                    Debug.Log("[RuntimeGameBootstrapper] Starting gameplay bootstrap.", this);
-                }
-
-                gameState.StartGame();
+                Debug.Log("[RuntimeGameBootstrapper] Scene bootstrap complete.", this);
             }
-
-            _bootstrapRoutine = null;
         }
     }
 }

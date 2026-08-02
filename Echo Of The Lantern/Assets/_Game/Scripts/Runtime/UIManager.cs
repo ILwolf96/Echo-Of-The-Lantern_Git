@@ -136,8 +136,6 @@ namespace EchoOfTheLantern.Runtime
 
         public void SetInteractionPrompt(string prompt)
         {
-            TryAutoBindFromScene();
-
             if (_promptText != null)
             {
                 _promptText.text = prompt;
@@ -146,8 +144,6 @@ namespace EchoOfTheLantern.Runtime
 
         public void SetBeaconProgress(int activated, int required)
         {
-            TryAutoBindFromScene();
-
             if (_objectiveText != null)
             {
                 _objectiveText.text = $"Beacons: {activated}/{required}";
@@ -157,7 +153,11 @@ namespace EchoOfTheLantern.Runtime
 
         public void FlashObjectiveProgress()
         {
-            RefreshObjectiveText();
+            ObjectiveManager objectiveManager = ObjectiveManager.Resolve();
+            if (objectiveManager != null)
+            {
+                SetBeaconProgress(objectiveManager.ActivatedBeacons, 3);
+            }
         }
 
         public void ShowWinPanel()

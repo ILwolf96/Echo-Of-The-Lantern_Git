@@ -18,7 +18,6 @@ namespace EchoOfTheLantern.Runtime
             Lost
         }
 
-        [SerializeField] private GameState _initialState = GameState.MainMenu;
         [SerializeField] private string _gameSceneName = "EchoOfTheLantern_Game";
         [SerializeField] private string _menuSceneName = "EchoOfTheLantern_Menu";
 
@@ -32,6 +31,8 @@ namespace EchoOfTheLantern.Runtime
         public event Action GameLost;
         public event Action GameRestarted;
 
+        private int _lastInitializedSceneHandle = -1;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -44,32 +45,89 @@ namespace EchoOfTheLantern.Runtime
             DontDestroyOnLoad(gameObject);
         }
 
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += HandleSceneLoaded;
+        }
+
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+        }
+
         private void Start()
         {
-            SetState(_initialState);
+            InitializeCurrentScene();
+        }
+
+        public void InitializeCurrentScene()
+        {
+            InitializeForScene(SceneManager.GetActiveScene());
+        }
+
+        private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            InitializeForScene(scene);
+        }
+
+        private void InitializeForScene(Scene scene)
+        {
+            if (!scene.IsValid())
+            {
+                return;
+            }
+
+            if (scene.handle == _lastInitializedSceneHandle)
+            {
+                return;
+            }
+
+            _lastInitializedSceneHandle = scene.handle;
+
+            Time.timeScale = 1f;
+
+            UIManager ui = UIManager.Resolve();
+            ObjectiveManager objectiveManager = ObjectiveManager.Resolve();
+
+            if (scene.name == _menuSceneName)
+            {
+                SetState(GameState.MainMenu);
+
+                if (ui != null)
+                {
+                    ui.TryAutoBindFromScene();
+                    ui.HideEndPanels();
+                }
+
+                return;
+            }
+
+            if (scene.name == _gameSceneName)
+            {
+                if (objectiveManager != null)
+                {
+                    objectiveManager.ResetObjectives();
+                }
+
+                if (ui != null)
+                {
+                    ui.TryAutoBindFromScene();
+                    ui.HideEndPanels();
+
+                    if (objectiveManager != null)
+                    {
+                        ui.SetBeaconProgress(objectiveManager.ActivatedBeacons, 3);
+                    }
+                }
+
+                SetState(GameState.Playing);
+                GameStarted?.Invoke();
+            }
         }
 
         public void StartGame()
         {
             Time.timeScale = 1f;
-
-            ObjectiveManager objectiveManager = ObjectiveManager.Resolve();
-            if (objectiveManager != null)
-            {
-                objectiveManager.ResetObjectives();
-            }
-
-            UIManager ui = UIManager.Resolve();
-            if (ui != null)
-            {
-                ui.TryAutoBindFromScene();
-                ui.HideEndPanels();
-                if (objectiveManager != null)
-                {
-                    ui.SetBeaconProgress(objectiveManager.ActivatedBeacons, 3);
-                }
-            }
-
             SetState(GameState.Playing);
             GameStarted?.Invoke();
         }
@@ -113,10 +171,6 @@ namespace EchoOfTheLantern.Runtime
             {
                 ui.ShowWinPanel();
             }
-            else
-            {
-                Debug.LogWarning("[GameStateManager] UIManager not found while trying to show Win panel.");
-            }
 
             GameWon?.Invoke();
         }
@@ -135,10 +189,6 @@ namespace EchoOfTheLantern.Runtime
             if (ui != null)
             {
                 ui.ShowLosePanel();
-            }
-            else
-            {
-                Debug.LogWarning("[GameStateManager] UIManager not found while trying to show Lose panel.");
             }
 
             GameLost?.Invoke();
